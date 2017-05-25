@@ -3,7 +3,7 @@
 // Copyright (c) 2011-2015 The Peercoin developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
-
+#define _SCL_SECURE_NO_WARNINGS
 #include "irc.h"
 #include "db.h"
 #include "net.h"
@@ -51,7 +51,7 @@ CAddress addrLocalHost(CService("0.0.0.0", 0), nLocalServices);
 CAddress addrSeenByPeer(CService("0.0.0.0", 0), nLocalServices);
 static CNode* pnodeLocalHost = NULL;
 uint64 nLocalHostNonce = 0;
-array<int, THREAD_MAX> vnThreadsRunning;
+boost::array<int, THREAD_MAX> vnThreadsRunning;
 static SOCKET hListenSocket = INVALID_SOCKET;
 CAddrMan addrman;
 
@@ -239,7 +239,10 @@ bool GetMyExternalIP(CNetAddr& ipRet)
                      "\r\n";
 
             pszKeyword = NULL; // Returns just IP address
-        }
+		}
+		else {
+			return false;
+		}
 
         if (GetMyExternalIP2(addrConnect, pszGet, pszKeyword, ipRet))
             return true;

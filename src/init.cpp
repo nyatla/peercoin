@@ -3,6 +3,8 @@
 // Copyright (c) 2011-2013 The PPCoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
+#define _SCL_SECURE_NO_WARNINGS
+
 #include "db.h"
 #include "walletdb.h"
 #include "bitcoinrpc.h"
@@ -18,6 +20,11 @@
 
 #ifndef WIN32
 #include <signal.h>
+#endif
+
+#ifdef _MSC_VER 
+#define strncasecmp _strnicmp
+#define strcasecmp _stricmp
 #endif
 
 using namespace std;
@@ -365,7 +372,7 @@ bool AppInit2(int argc, char* argv[])
     nStart = GetTimeMillis();
     if (!LoadAddresses())
         strErrors << _("Error loading addr.dat") << "\n";
-    printf(" addresses   %15"PRI64d"ms\n", GetTimeMillis() - nStart);
+    printf(" addresses   %15" PRI64d "ms\n", GetTimeMillis() - nStart);
 
     InitMessage(_("Loading block index..."));
     printf("Loading block index...\n");
@@ -381,7 +388,7 @@ bool AppInit2(int argc, char* argv[])
         printf("Shutdown requested. Exiting.\n");
         return false;
     }
-    printf(" block index %15"PRI64d"ms\n", GetTimeMillis() - nStart);
+    printf(" block index %15" PRI64d "ms\n", GetTimeMillis() - nStart);
 
     InitMessage(_("Loading wallet..."));
     printf("Loading wallet...\n");
@@ -436,7 +443,7 @@ bool AppInit2(int argc, char* argv[])
     }
 
     printf("%s", strErrors.str().c_str());
-    printf(" wallet      %15"PRI64d"ms\n", GetTimeMillis() - nStart);
+    printf(" wallet      %15" PRI64d "ms\n", GetTimeMillis() - nStart);
 
     RegisterWallet(pwalletMain);
 
@@ -456,7 +463,7 @@ bool AppInit2(int argc, char* argv[])
         printf("Rescanning last %i blocks (from block %i)...\n", pindexBest->nHeight - pindexRescan->nHeight, pindexRescan->nHeight);
         nStart = GetTimeMillis();
         pwalletMain->ScanForWalletTransactions(pindexRescan, true);
-        printf(" rescan      %15"PRI64d"ms\n", GetTimeMillis() - nStart);
+        printf(" rescan      %15" PRI64d "ms\n", GetTimeMillis() - nStart);
     }
 
     InitMessage(_("Done loading"));

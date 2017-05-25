@@ -155,8 +155,35 @@ public:
         nBlockPos = nBlockPosIn;
         nTxPos = nTxPosIn;
     }
-
-    IMPLEMENT_SERIALIZE( READWRITE(FLATDATA(*this)); )
+public:
+	unsigned int GetSerializeSize(int nType, int nVersion)const
+	{
+		//fGetSize=true/fWrite=false/fRead=false
+		CSerActionGetSerializeSize ser_action;
+		unsigned int nSerSize = 0;
+		ser_streamplaceholder s;
+		s.nType = nType;
+		s.nVersion = nVersion;
+		READWRITE(FLATDATA(*this));
+		return nSerSize;
+	}
+	template<typename Stream>
+	void Serialize(Stream& s, int nType, int nVersion)const
+	{
+		//fGetSize=false/fWrite=true/fRead=false
+		CSerActionSerialize ser_action;
+		unsigned int nSerSize = 0;
+		READWRITE(FLATDATA(*this));
+	}
+	template<typename Stream>
+	void Unserialize(Stream s, int nType, int nVersion)
+	{
+		//fGetSize=false/fWrite=false/fRead=true
+		CSerActionUnserialize ser_action;
+		unsigned int nSerSize = 0;
+		READWRITE(FLATDATA(*this));
+	}
+public:
     void SetNull() { nFile = -1; nBlockPos = 0; nTxPos = 0; }
     bool IsNull() const { return (nFile == -1); }
 
@@ -212,8 +239,36 @@ public:
 
     COutPoint() { SetNull(); }
     COutPoint(uint256 hashIn, unsigned int nIn) { hash = hashIn; n = nIn; }
-    IMPLEMENT_SERIALIZE( READWRITE(FLATDATA(*this)); )
-    void SetNull() { hash = 0; n = -1; }
+public:
+	unsigned int GetSerializeSize(int nType, int nVersion)const
+	{
+		//fGetSize=true/fWrite=false/fRead=false
+		CSerActionGetSerializeSize ser_action;
+		unsigned int nSerSize = 0;
+		ser_streamplaceholder s;
+		s.nType = nType;
+		s.nVersion = nVersion;
+		READWRITE(FLATDATA(*this));
+		return nSerSize;
+	}
+	template<typename Stream>
+	void Serialize(Stream& s, int nType, int nVersion)const
+	{
+		//fGetSize=false/fWrite=true/fRead=false
+		CSerActionSerialize ser_action;
+		unsigned int nSerSize = 0;
+		READWRITE(FLATDATA(*this));
+	}
+	template<typename Stream>
+	void Unserialize(Stream s, int nType, int nVersion)
+	{
+		//fGetSize=false/fWrite=false/fRead=true
+		CSerActionUnserialize ser_action;
+		unsigned int nSerSize = 0;
+		READWRITE(FLATDATA(*this));
+	}
+public:
+	void SetNull() { hash = 0; n = -1; }
     bool IsNull() const { return (hash == 0 && n == -1); }
 
     friend bool operator<(const COutPoint& a, const COutPoint& b)
@@ -274,13 +329,40 @@ public:
         scriptSig = scriptSigIn;
         nSequence = nSequenceIn;
     }
-
-    IMPLEMENT_SERIALIZE
-    (
-        READWRITE(prevout);
-        READWRITE(scriptSig);
-        READWRITE(nSequence);
-    )
+public:
+	unsigned int GetSerializeSize(int nType, int nVersion)const
+	{
+		//fGetSize=true/fWrite=false/fRead=false
+		CSerActionGetSerializeSize ser_action;
+		unsigned int nSerSize = 0;
+		ser_streamplaceholder s;
+		s.nType = nType;
+		s.nVersion = nVersion;
+		READWRITE(prevout);
+		READWRITE(scriptSig);
+		READWRITE(nSequence);
+		return nSerSize;
+	}
+	template<typename Stream>
+	void Serialize(Stream& s, int nType, int nVersion)const
+	{
+		//fGetSize=false/fWrite=true/fRead=false
+		CSerActionSerialize ser_action;
+		unsigned int nSerSize = 0;
+		READWRITE(prevout);
+		READWRITE(scriptSig);
+		READWRITE(nSequence);
+	}
+	template<typename Stream>
+	void Unserialize(Stream s, int nType, int nVersion)
+	{
+		//fGetSize=false/fWrite=false/fRead=true
+		CSerActionUnserialize ser_action;
+		unsigned int nSerSize = 0;
+		READWRITE(prevout);
+		READWRITE(scriptSig);
+		READWRITE(nSequence);
+	}
 
     bool IsFinal() const
     {
@@ -347,13 +429,38 @@ public:
         nValue = nValueIn;
         scriptPubKey = scriptPubKeyIn;
     }
-
-    IMPLEMENT_SERIALIZE
-    (
-        READWRITE(nValue);
-        READWRITE(scriptPubKey);
-    )
-
+public:
+	unsigned int GetSerializeSize(int nType, int nVersion)const
+	{
+		//fGetSize=true/fWrite=false/fRead=false
+		CSerActionGetSerializeSize ser_action;
+		unsigned int nSerSize = 0;
+		ser_streamplaceholder s;
+		s.nType = nType;
+		s.nVersion = nVersion;
+		READWRITE(nValue);
+		READWRITE(scriptPubKey);
+		return nSerSize;
+	}
+	template<typename Stream>
+	void Serialize(Stream& s, int nType, int nVersion)const
+	{
+		//fGetSize=false/fWrite=true/fRead=false
+		CSerActionSerialize ser_action;
+		unsigned int nSerSize = 0;
+		READWRITE(nValue);
+		READWRITE(scriptPubKey);
+	}
+	template<typename Stream>
+	void Unserialize(Stream s, int nType, int nVersion)
+	{
+		//fGetSize=false/fWrite=false/fRead=true
+		CSerActionUnserialize ser_action;
+		unsigned int nSerSize = 0;
+		READWRITE(nValue);
+		READWRITE(scriptPubKey);
+	}
+public:
     void SetNull()
     {
         nValue = -1;
@@ -441,16 +548,50 @@ public:
     {
         SetNull();
     }
-
-    IMPLEMENT_SERIALIZE
-    (
-        READWRITE(this->nVersion);
-        nVersion = this->nVersion;
-        READWRITE(nTime);
-        READWRITE(vin);
-        READWRITE(vout);
-        READWRITE(nLockTime);
-    )
+public:
+	unsigned int GetSerializeSize(int nType, int nVersion)const
+	{
+		//fGetSize=true/fWrite=false/fRead=false
+		CSerActionGetSerializeSize ser_action;
+		unsigned int nSerSize = 0;
+		ser_streamplaceholder s;
+		s.nType = nType;
+		s.nVersion = nVersion;
+		READWRITE(this->nVersion);
+		nVersion = this->nVersion;
+		READWRITE(nTime);
+		READWRITE(vin);
+		READWRITE(vout);
+		READWRITE(nLockTime);
+		return nSerSize;
+	}
+	template<typename Stream>
+	void Serialize(Stream& s, int nType, int nVersion)const
+	{
+		//fGetSize=false/fWrite=true/fRead=false
+		CSerActionSerialize ser_action;
+		unsigned int nSerSize = 0;
+		READWRITE(this->nVersion);
+		nVersion = this->nVersion;
+		READWRITE(nTime);
+		READWRITE(vin);
+		READWRITE(vout);
+		READWRITE(nLockTime);
+	}
+	template<typename Stream>
+	void Unserialize(Stream s, int nType, int nVersion)
+	{
+		//fGetSize=false/fWrite=false/fRead=true
+		CSerActionUnserialize ser_action;
+		unsigned int nSerSize = 0;
+		READWRITE(this->nVersion);
+		nVersion = this->nVersion;
+		READWRITE(nTime);
+		READWRITE(vin);
+		READWRITE(vout);
+		READWRITE(nLockTime);
+	}
+public:
 
     void SetNull()
     {
@@ -639,24 +780,24 @@ public:
     {
         CAutoFile filein = CAutoFile(OpenBlockFile(pos.nFile, 0, pfileRet ? "rb+" : "rb"), SER_DISK, CLIENT_VERSION);
         if (!filein)
-            return error("CTransaction::ReadFromDisk() : OpenBlockFile failed");
+            return ::error("CTransaction::ReadFromDisk() : OpenBlockFile failed");
 
         // Read transaction
         if (fseek(filein, pos.nTxPos, SEEK_SET) != 0)
-            return error("CTransaction::ReadFromDisk() : fseek failed");
+            return ::error("CTransaction::ReadFromDisk() : fseek failed");
 
         try {
             filein >> *this;
         }
         catch (std::exception &e) {
-            return error("%s() : deserialize or I/O error", __PRETTY_FUNCTION__);
+            return ::error("%s() : deserialize or I/O error", __FUNCSIG__);
         }
 
         // Return file pointer
         if (pfileRet)
         {
             if (fseek(filein, pos.nTxPos, SEEK_SET) != 0)
-                return error("CTransaction::ReadFromDisk() : second fseek failed");
+                return ::error("CTransaction::ReadFromDisk() : second fseek failed");
             *pfileRet = filein.release();
         }
         return true;
@@ -783,16 +924,47 @@ public:
         nIndex = -1;
         fMerkleVerified = false;
     }
+public:
+	unsigned int GetSerializeSize(int nType, int nVersion)const
+	{
+		//fGetSize=true/fWrite=false/fRead=false
+		CSerActionGetSerializeSize ser_action;
+		unsigned int nSerSize = 0;
+		ser_streamplaceholder s;
+		s.nType = nType;
+		s.nVersion = nVersion;
+		nSerSize += SerReadWrite(s, *(CTransaction*)this, nType, nVersion, ser_action);
+		nVersion = this->nVersion;
+		READWRITE(hashBlock);
+		READWRITE(vMerkleBranch);
+		READWRITE(nIndex);
+		return nSerSize;
+	}
+	template<typename Stream>
+	void Serialize(Stream& s, int nType, int nVersion)const
+	{
+		//fGetSize=false/fWrite=true/fRead=false
+		CSerActionSerialize ser_action;
+		unsigned int nSerSize = 0;
+		nSerSize += SerReadWrite(s, *(CTransaction*)this, nType, nVersion, ser_action);
+		nVersion = this->nVersion;
+		READWRITE(hashBlock);
+		READWRITE(vMerkleBranch);
+		READWRITE(nIndex);
+	}
+	template<typename Stream>
+	void Unserialize(Stream s, int nType, int nVersion)
+	{
+		//fGetSize=false/fWrite=false/fRead=true
+		CSerActionUnserialize ser_action;
+		unsigned int nSerSize = 0;
+		nSerSize += SerReadWrite(s, *(CTransaction*)this, nType, nVersion, ser_action);
+		nVersion = this->nVersion;
+		READWRITE(hashBlock);
+		READWRITE(vMerkleBranch);
+		READWRITE(nIndex);
+	}
 
-
-    IMPLEMENT_SERIALIZE
-    (
-        nSerSize += SerReadWrite(s, *(CTransaction*)this, nType, nVersion, ser_action);
-        nVersion = this->nVersion;
-        READWRITE(hashBlock);
-        READWRITE(vMerkleBranch);
-        READWRITE(nIndex);
-    )
 
 
     int SetMerkleBranch(const CBlock* pblock=NULL);
@@ -827,14 +999,44 @@ public:
         pos = posIn;
         vSpent.resize(nOutputs);
     }
-
-    IMPLEMENT_SERIALIZE
-    (
-        if (!(nType & SER_GETHASH))
-            READWRITE(nVersion);
-        READWRITE(pos);
-        READWRITE(vSpent);
-    )
+public:
+	unsigned int GetSerializeSize(int nType, int nVersion)const
+	{
+		//fGetSize=true/fWrite=false/fRead=false
+		CSerActionGetSerializeSize ser_action;
+		unsigned int nSerSize = 0;
+		ser_streamplaceholder s;
+		s.nType = nType;
+		s.nVersion = nVersion;
+		if (!(nType & SER_GETHASH))
+			READWRITE(nVersion);
+		READWRITE(pos);
+		READWRITE(vSpent);
+		return nSerSize;
+	}
+	template<typename Stream>
+	void Serialize(Stream& s, int nType, int nVersion)const
+	{
+		//fGetSize=false/fWrite=true/fRead=false
+		CSerActionSerialize ser_action;
+		unsigned int nSerSize = 0;
+		if (!(nType & SER_GETHASH))
+			READWRITE(nVersion);
+		READWRITE(pos);
+		READWRITE(vSpent);
+	}
+	template<typename Stream>
+	void Unserialize(Stream s, int nType, int nVersion)
+	{
+		//fGetSize=false/fWrite=false/fRead=true
+		CSerActionUnserialize ser_action;
+		unsigned int nSerSize = 0;
+		if (!(nType & SER_GETHASH))
+			READWRITE(nVersion);
+		READWRITE(pos);
+		READWRITE(vSpent);
+	}
+public:
 
     void SetNull()
     {
@@ -903,30 +1105,78 @@ public:
     {
         SetNull();
     }
+public:
+	unsigned int GetSerializeSize(int nType, int nVersion)const
+	{
+		//fGetSize=true/fWrite=false/fRead=false
+		CSerActionGetSerializeSize ser_action;
+		unsigned int nSerSize = 0;
+		ser_streamplaceholder s;
+		s.nType = nType;
+		s.nVersion = nVersion;
+		READWRITE(this->nVersion);
+		nVersion = this->nVersion;
+		READWRITE(hashPrevBlock);
+		READWRITE(hashMerkleRoot);
+		READWRITE(nTime);
+		READWRITE(nBits);
+		READWRITE(nNonce);
 
-    IMPLEMENT_SERIALIZE
-    (
-        READWRITE(this->nVersion);
-        nVersion = this->nVersion;
-        READWRITE(hashPrevBlock);
-        READWRITE(hashMerkleRoot);
-        READWRITE(nTime);
-        READWRITE(nBits);
-        READWRITE(nNonce);
+		// ConnectBlock depends on vtx following header to generate CDiskTxPos
+		if (!(nType & (SER_GETHASH | SER_BLOCKHEADERONLY)))
+		{
+			READWRITE(vtx);
+			READWRITE(vchBlockSig);
+		}
+		return nSerSize;
+	}
+	template<typename Stream>
+	void Serialize(Stream& s, int nType, int nVersion)const
+	{
+		//fGetSize=false/fWrite=true/fRead=false
+		CSerActionSerialize ser_action;
+		unsigned int nSerSize = 0;
+		READWRITE(this->nVersion);
+		nVersion = this->nVersion;
+		READWRITE(hashPrevBlock);
+		READWRITE(hashMerkleRoot);
+		READWRITE(nTime);
+		READWRITE(nBits);
+		READWRITE(nNonce);
 
-        // ConnectBlock depends on vtx following header to generate CDiskTxPos
-        if (!(nType & (SER_GETHASH|SER_BLOCKHEADERONLY)))
-        {
-            READWRITE(vtx);
-            READWRITE(vchBlockSig);
-        }
-        else if (fRead)
-        {
-            const_cast<CBlock*>(this)->vtx.clear();
-            const_cast<CBlock*>(this)->vchBlockSig.clear();
-        }
-    )
+		// ConnectBlock depends on vtx following header to generate CDiskTxPos
+		if (!(nType & (SER_GETHASH | SER_BLOCKHEADERONLY)))
+		{
+			READWRITE(vtx);
+			READWRITE(vchBlockSig);
+		}
+	}
+	template<typename Stream>
+	void Unserialize(Stream s, int nType, int nVersion)
+	{
+		//fGetSize=false/fWrite=false/fRead=true
+		CSerActionUnserialize ser_action;
+		unsigned int nSerSize = 0;
+		READWRITE(this->nVersion);
+		nVersion = this->nVersion;
+		READWRITE(hashPrevBlock);
+		READWRITE(hashMerkleRoot);
+		READWRITE(nTime);
+		READWRITE(nBits);
+		READWRITE(nNonce);
 
+		// ConnectBlock depends on vtx following header to generate CDiskTxPos
+		if (!(nType & (SER_GETHASH | SER_BLOCKHEADERONLY)))
+		{
+			READWRITE(vtx);
+			READWRITE(vchBlockSig);
+		}
+		else
+		{
+			const_cast<CBlock*>(this)->vtx.clear();
+			const_cast<CBlock*>(this)->vchBlockSig.clear();
+		}
+	}
     void SetNull()
     {
         nVersion = 1;
@@ -1039,7 +1289,7 @@ public:
         // Open history file to append
         CAutoFile fileout = CAutoFile(AppendBlockFile(nFileRet), SER_DISK, CLIENT_VERSION);
         if (!fileout)
-            return error("CBlock::WriteToDisk() : AppendBlockFile failed");
+            return ::error("CBlock::WriteToDisk() : AppendBlockFile failed");
 
         // Write index header
         unsigned char pchMessageStart[4];
@@ -1050,7 +1300,7 @@ public:
         // Write block
         long fileOutPos = ftell(fileout);
         if (fileOutPos < 0)
-            return error("CBlock::WriteToDisk() : ftell failed");
+            return ::error("CBlock::WriteToDisk() : ftell failed");
         nBlockPosRet = fileOutPos;
         fileout << *this;
 
@@ -1075,7 +1325,7 @@ public:
         // Open history file to read
         CAutoFile filein = CAutoFile(OpenBlockFile(nFile, nBlockPos, "rb"), SER_DISK, CLIENT_VERSION);
         if (!filein)
-            return error("CBlock::ReadFromDisk() : OpenBlockFile failed");
+            return ::error("CBlock::ReadFromDisk() : OpenBlockFile failed");
         if (!fReadTransactions)
             filein.nType |= SER_BLOCKHEADERONLY;
 
@@ -1084,12 +1334,12 @@ public:
             filein >> *this;
         }
         catch (std::exception &e) {
-            return error("%s() : deserialize or I/O error", __PRETTY_FUNCTION__);
+            return ::error("%s() : deserialize or I/O error", __FUNCSIG__);
         }
 
         // Check the header
         if (fReadTransactions && IsProofOfWork() && !CheckProofOfWork(GetHash(), nBits))
-            return error("CBlock::ReadFromDisk() : errors in block header");
+            return ::error("CBlock::ReadFromDisk() : errors in block header");
 
         return true;
     }
@@ -1369,7 +1619,7 @@ public:
 
     std::string ToString() const
     {
-        return strprintf("CBlockIndex(nprev=%08x, pnext=%08x, nFile=%d, nBlockPos=%-6d nHeight=%d, nMint=%s, nMoneySupply=%s, nFlags=(%s)(%d)(%s), nStakeModifier=%016"PRI64x", nStakeModifierChecksum=%08x, hashProofOfStake=%s, prevoutStake=(%s), nStakeTime=%d merkle=%s, hashBlock=%s)",
+        return strprintf("CBlockIndex(nprev=%08x, pnext=%08x, nFile=%d, nBlockPos=%-6d nHeight=%d, nMint=%s, nMoneySupply=%s, nFlags=(%s)(%d)(%s), nStakeModifier=%016" PRI64x ", nStakeModifierChecksum=%08x, hashProofOfStake=%s, prevoutStake=(%s), nStakeTime=%d merkle=%s, hashBlock=%s)",
             pprev, pnext, nFile, nBlockPos, nHeight,
             FormatMoney(nMint).c_str(), FormatMoney(nMoneySupply).c_str(),
             GeneratedStakeModifier() ? "MOD" : "-", GetStakeEntropyBit(), IsProofOfStake()? "PoS" : "PoW",
@@ -1406,41 +1656,110 @@ public:
         hashPrev = (pprev ? pprev->GetBlockHash() : 0);
         hashNext = (pnext ? pnext->GetBlockHash() : 0);
     }
+public:
+	unsigned int GetSerializeSize(int nType, int nVersion)const
+	{
+		//fGetSize=true/fWrite=false/fRead=false
+		CSerActionGetSerializeSize ser_action;
+		unsigned int nSerSize = 0;
+		ser_streamplaceholder s;
+		s.nType = nType;
+		s.nVersion = nVersion;
+		if (!(nType & SER_GETHASH))
+			READWRITE(nVersion);
 
-    IMPLEMENT_SERIALIZE
-    (
-        if (!(nType & SER_GETHASH))
-            READWRITE(nVersion);
+		READWRITE(hashNext);
+		READWRITE(nFile);
+		READWRITE(nBlockPos);
+		READWRITE(nHeight);
+		READWRITE(nMint);
+		READWRITE(nMoneySupply);
+		READWRITE(nFlags);
+		READWRITE(nStakeModifier);
+		if (IsProofOfStake())
+		{
+			READWRITE(prevoutStake);
+			READWRITE(nStakeTime);
+			READWRITE(hashProofOfStake);
+		}
+		// block header
+		READWRITE(this->nVersion);
+		READWRITE(hashPrev);
+		READWRITE(hashMerkleRoot);
+		READWRITE(nTime);
+		READWRITE(nBits);
+		READWRITE(nNonce);
 
-        READWRITE(hashNext);
-        READWRITE(nFile);
-        READWRITE(nBlockPos);
-        READWRITE(nHeight);
-        READWRITE(nMint);
-        READWRITE(nMoneySupply);
-        READWRITE(nFlags);
-        READWRITE(nStakeModifier);
-        if (IsProofOfStake())
-        {
-            READWRITE(prevoutStake);
-            READWRITE(nStakeTime);
-            READWRITE(hashProofOfStake);
-        }
-        else if (fRead)
-        {
-            const_cast<CDiskBlockIndex*>(this)->prevoutStake.SetNull();
-            const_cast<CDiskBlockIndex*>(this)->nStakeTime = 0;
-            const_cast<CDiskBlockIndex*>(this)->hashProofOfStake = 0;
-        }
+		return nSerSize;
+	}
+	template<typename Stream>
+	void Serialize(Stream& s, int nType, int nVersion)const
+	{
+		//fGetSize=false/fWrite=true/fRead=false
+		CSerActionSerialize ser_action;
+		unsigned int nSerSize = 0;
+		if (!(nType & SER_GETHASH))
+			READWRITE(nVersion);
 
-        // block header
-        READWRITE(this->nVersion);
-        READWRITE(hashPrev);
-        READWRITE(hashMerkleRoot);
-        READWRITE(nTime);
-        READWRITE(nBits);
-        READWRITE(nNonce);
-    )
+		READWRITE(hashNext);
+		READWRITE(nFile);
+		READWRITE(nBlockPos);
+		READWRITE(nHeight);
+		READWRITE(nMint);
+		READWRITE(nMoneySupply);
+		READWRITE(nFlags);
+		READWRITE(nStakeModifier);
+		if (IsProofOfStake())
+		{
+			READWRITE(prevoutStake);
+			READWRITE(nStakeTime);
+			READWRITE(hashProofOfStake);
+		}
+		// block header
+		READWRITE(this->nVersion);
+		READWRITE(hashPrev);
+		READWRITE(hashMerkleRoot);
+		READWRITE(nTime);
+		READWRITE(nBits);
+		READWRITE(nNonce);
+	}
+	template<typename Stream>
+	void Unserialize(Stream s, int nType, int nVersion)
+	{
+		//fGetSize=false/fWrite=false/fRead=true
+		CSerActionUnserialize ser_action;
+		unsigned int nSerSize = 0;
+		if (!(nType & SER_GETHASH))
+			READWRITE(nVersion);
+
+		READWRITE(hashNext);
+		READWRITE(nFile);
+		READWRITE(nBlockPos);
+		READWRITE(nHeight);
+		READWRITE(nMint);
+		READWRITE(nMoneySupply);
+		READWRITE(nFlags);
+		READWRITE(nStakeModifier);
+		if (IsProofOfStake())
+		{
+			READWRITE(prevoutStake);
+			READWRITE(nStakeTime);
+			READWRITE(hashProofOfStake);
+		}else
+		{
+			const_cast<CDiskBlockIndex*>(this)->prevoutStake.SetNull();
+			const_cast<CDiskBlockIndex*>(this)->nStakeTime = 0;
+			const_cast<CDiskBlockIndex*>(this)->hashProofOfStake = 0;
+		}
+
+		// block header
+		READWRITE(this->nVersion);
+		READWRITE(hashPrev);
+		READWRITE(hashMerkleRoot);
+		READWRITE(nTime);
+		READWRITE(nBits);
+		READWRITE(nNonce);
+	}
 
     uint256 GetBlockHash() const
     {
@@ -1509,13 +1828,40 @@ public:
     {
         vHave = vHaveIn;
     }
-
-    IMPLEMENT_SERIALIZE
-    (
-        if (!(nType & SER_GETHASH))
-            READWRITE(nVersion);
-        READWRITE(vHave);
-    )
+public:
+	unsigned int GetSerializeSize(int nType, int nVersion)const
+	{
+		//fGetSize=true/fWrite=false/fRead=false
+		CSerActionGetSerializeSize ser_action;
+		unsigned int nSerSize = 0;
+		ser_streamplaceholder s;
+		s.nType = nType;
+		s.nVersion = nVersion;
+		if (!(nType & SER_GETHASH))
+			READWRITE(nVersion);
+		READWRITE(vHave);
+		return nSerSize;
+	}
+	template<typename Stream>
+	void Serialize(Stream& s, int nType, int nVersion)const
+	{
+		//fGetSize=false/fWrite=true/fRead=false
+		CSerActionSerialize ser_action;
+		unsigned int nSerSize = 0;
+		if (!(nType & SER_GETHASH))
+			READWRITE(nVersion);
+		READWRITE(vHave);
+	}
+	template<typename Stream>
+	void Unserialize(Stream s, int nType, int nVersion)
+	{
+		//fGetSize=false/fWrite=false/fRead=true
+		CSerActionUnserialize ser_action;
+		unsigned int nSerSize = 0;
+		if (!(nType & SER_GETHASH))
+			READWRITE(nVersion);
+		READWRITE(vHave);
+	}
 
     void SetNull()
     {
@@ -1638,25 +1984,78 @@ public:
     std::string strComment;
     std::string strStatusBar;
     std::string strReserved;
+public:
+	unsigned int GetSerializeSize(int nType, int nVersion)const
+	{
+		//fGetSize=true/fWrite=false/fRead=false
+		CSerActionGetSerializeSize ser_action;
+		unsigned int nSerSize = 0;
+		ser_streamplaceholder s;
+		s.nType = nType;
+		s.nVersion = nVersion;
+		READWRITE(this->nVersion);
+		nVersion = this->nVersion;
+		READWRITE(nRelayUntil);
+		READWRITE(nExpiration);
+		READWRITE(nID);
+		READWRITE(nCancel);
+		READWRITE(setCancel);
+		READWRITE(nMinVer);
+		READWRITE(nMaxVer);
+		READWRITE(setSubVer);
+		READWRITE(nPriority);
 
-    IMPLEMENT_SERIALIZE
-    (
-        READWRITE(this->nVersion);
-        nVersion = this->nVersion;
-        READWRITE(nRelayUntil);
-        READWRITE(nExpiration);
-        READWRITE(nID);
-        READWRITE(nCancel);
-        READWRITE(setCancel);
-        READWRITE(nMinVer);
-        READWRITE(nMaxVer);
-        READWRITE(setSubVer);
-        READWRITE(nPriority);
+		READWRITE(strComment);
+		READWRITE(strStatusBar);
+		READWRITE(strReserved);
+		return nSerSize;
+	}
+	template<typename Stream>
+	void Serialize(Stream& s, int nType, int nVersion)const
+	{
+		//fGetSize=false/fWrite=true/fRead=false
+		CSerActionSerialize ser_action;
+		unsigned int nSerSize = 0;
+		READWRITE(this->nVersion);
+		nVersion = this->nVersion;
+		READWRITE(nRelayUntil);
+		READWRITE(nExpiration);
+		READWRITE(nID);
+		READWRITE(nCancel);
+		READWRITE(setCancel);
+		READWRITE(nMinVer);
+		READWRITE(nMaxVer);
+		READWRITE(setSubVer);
+		READWRITE(nPriority);
 
-        READWRITE(strComment);
-        READWRITE(strStatusBar);
-        READWRITE(strReserved);
-    )
+		READWRITE(strComment);
+		READWRITE(strStatusBar);
+		READWRITE(strReserved);
+	}
+	template<typename Stream>
+	void Unserialize(Stream s, int nType, int nVersion)
+	{
+		//fGetSize=false/fWrite=false/fRead=true
+		CSerActionUnserialize ser_action;
+		unsigned int nSerSize = 0;
+		READWRITE(this->nVersion);
+		nVersion = this->nVersion;
+		READWRITE(nRelayUntil);
+		READWRITE(nExpiration);
+		READWRITE(nID);
+		READWRITE(nCancel);
+		READWRITE(setCancel);
+		READWRITE(nMinVer);
+		READWRITE(nMaxVer);
+		READWRITE(setSubVer);
+		READWRITE(nPriority);
+
+		READWRITE(strComment);
+		READWRITE(strStatusBar);
+		READWRITE(strReserved);
+	}
+
+public:
 
     void SetNull()
     {
@@ -1687,8 +2086,8 @@ public:
         return strprintf(
                 "CAlert(\n"
                 "    nVersion     = %d\n"
-                "    nRelayUntil  = %"PRI64d"\n"
-                "    nExpiration  = %"PRI64d"\n"
+                "    nRelayUntil  = %" PRI64d "\n"
+                "    nExpiration  = %" PRI64d "\n"
                 "    nID          = %d\n"
                 "    nCancel      = %d\n"
                 "    setCancel    = %s\n"
@@ -1730,12 +2129,37 @@ public:
     {
         SetNull();
     }
-
-    IMPLEMENT_SERIALIZE
-    (
-        READWRITE(vchMsg);
-        READWRITE(vchSig);
-    )
+public:
+	unsigned int GetSerializeSize(int nType, int nVersion)const
+	{
+		//fGetSize=true/fWrite=false/fRead=false
+		CSerActionGetSerializeSize ser_action;
+		unsigned int nSerSize = 0;
+		ser_streamplaceholder s;
+		s.nType = nType;
+		s.nVersion = nVersion;
+		READWRITE(vchMsg);
+		READWRITE(vchSig);
+		return nSerSize;
+	}
+	template<typename Stream>
+	void Serialize(Stream& s, int nType, int nVersion)const
+	{
+		//fGetSize=false/fWrite=true/fRead=false
+		CSerActionSerialize ser_action;
+		unsigned int nSerSize = 0;
+		READWRITE(vchMsg);
+		READWRITE(vchSig);
+	}
+	template<typename Stream>
+	void Unserialize(Stream s, int nType, int nVersion)
+	{
+		//fGetSize=false/fWrite=false/fRead=true
+		CSerActionUnserialize ser_action;
+		unsigned int nSerSize = 0;
+		READWRITE(vchMsg);
+		READWRITE(vchSig);
+	}
 
     void SetNull()
     {
@@ -1801,9 +2225,9 @@ public:
     {
         CKey key;
         if (!key.SetPubKey(ParseHex("04a0a849dd49b113d3179a332dd77715c43be4d0076e2f19e66de23dd707e56630f792f298dfd209bf042bb3561f4af6983f3d81e439737ab0bf7f898fecd21aab")))
-            return error("CAlert::CheckSignature() : SetPubKey failed");
+            return ::error("CAlert::CheckSignature() : SetPubKey failed");
         if (!key.Verify(Hash(vchMsg.begin(), vchMsg.end()), vchSig))
-            return error("CAlert::CheckSignature() : verify signature failed");
+            return ::error("CAlert::CheckSignature() : verify signature failed");
 
         // Now unserialize the data
         CDataStream sMsg(vchMsg, SER_NETWORK, PROTOCOL_VERSION);

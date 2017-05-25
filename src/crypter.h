@@ -39,15 +39,47 @@ public:
     // Use this for more parameters to key derivation,
     // such as the various parameters to scrypt
     std::vector<unsigned char> vchOtherDerivationParameters;
-
-    IMPLEMENT_SERIALIZE
-    (
-        READWRITE(vchCryptedKey);
-        READWRITE(vchSalt);
-        READWRITE(nDerivationMethod);
-        READWRITE(nDeriveIterations);
-        READWRITE(vchOtherDerivationParameters);
-    )
+public:
+	unsigned int GetSerializeSize(int nType, int nVersion)const
+	{
+		//fGetSize=true/fWrite=false/fRead=false
+		CSerActionGetSerializeSize ser_action;
+		unsigned int nSerSize = 0;
+		ser_streamplaceholder s;
+		s.nType = nType;
+		s.nVersion = nVersion;
+		READWRITE(vchCryptedKey);
+		READWRITE(vchSalt);
+		READWRITE(nDerivationMethod);
+		READWRITE(nDeriveIterations);
+		READWRITE(vchOtherDerivationParameters);
+		return nSerSize;
+	}
+	template<typename Stream>
+	void Serialize(Stream& s, int nType, int nVersion)const
+	{
+		//fGetSize=false/fWrite=true/fRead=false
+		CSerActionSerialize ser_action;
+		unsigned int nSerSize = 0;
+		READWRITE(vchCryptedKey);
+		READWRITE(vchSalt);
+		READWRITE(nDerivationMethod);
+		READWRITE(nDeriveIterations);
+		READWRITE(vchOtherDerivationParameters);
+	}
+	template<typename Stream>
+	void Unserialize(Stream s, int nType, int nVersion)
+	{
+		//fGetSize=false/fWrite=false/fRead=true
+		CSerActionUnserialize ser_action;
+		unsigned int nSerSize = 0;
+		READWRITE(vchCryptedKey);
+		READWRITE(vchSalt);
+		READWRITE(nDerivationMethod);
+		READWRITE(nDeriveIterations);
+		READWRITE(vchOtherDerivationParameters);
+	}
+public:
     CMasterKey()
     {
         // 25000 rounds is just under 0.1 seconds on a 1.86 GHz Pentium M

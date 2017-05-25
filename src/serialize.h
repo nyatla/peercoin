@@ -57,43 +57,60 @@ enum
     SER_BLOCKHEADERONLY = (1 << 17),
 };
 
-#define IMPLEMENT_SERIALIZE(statements)    \
-    unsigned int GetSerializeSize(int nType, int nVersion) const  \
-    {                                           \
-        CSerActionGetSerializeSize ser_action;  \
-        const bool fGetSize = true;             \
-        const bool fWrite = false;              \
-        const bool fRead = false;               \
-        unsigned int nSerSize = 0;              \
-        ser_streamplaceholder s;                \
-        assert(fGetSize||fWrite||fRead); /* suppress warning */ \
-        s.nType = nType;                        \
-        s.nVersion = nVersion;                  \
-        {statements}                            \
-        return nSerSize;                        \
-    }                                           \
-    template<typename Stream>                   \
-    void Serialize(Stream& s, int nType, int nVersion) const  \
-    {                                           \
-        CSerActionSerialize ser_action;         \
-        const bool fGetSize = false;            \
-        const bool fWrite = true;               \
-        const bool fRead = false;               \
-        unsigned int nSerSize = 0;              \
-        assert(fGetSize||fWrite||fRead); /* suppress warning */ \
-        {statements}                            \
-    }                                           \
-    template<typename Stream>                   \
-    void Unserialize(Stream& s, int nType, int nVersion)  \
-    {                                           \
-        CSerActionUnserialize ser_action;       \
-        const bool fGetSize = false;            \
-        const bool fWrite = false;              \
-        const bool fRead = true;                \
-        unsigned int nSerSize = 0;              \
-        assert(fGetSize||fWrite||fRead); /* suppress warning */ \
-        {statements}                            \
-    }
+//
+// Support for IMPLEMENT_SERIALIZE and READWRITE macro
+//
+class CSerActionGetSerializeSize { };
+class CSerActionSerialize { };
+class CSerActionUnserialize { };
+struct ser_streamplaceholder
+{
+	int nType;
+	int nVersion;
+};
+
+//class Serializable
+//{
+//public:
+//	template<typename Stream>
+//	virtual void Serializable_statement(bool fGetSize, bool fWrite, bool fRead,unsigned int nSerSize, Stream& s, int nType, int nVersion, CSerActionGetSerializeSize& ser_action)const = 0;
+//	unsigned int GetSerializeSize(int nType, int nVersion)const
+//	{
+//		CSerActionGetSerializeSize ser_action;
+//		const bool fGetSize = true;
+//		const bool fWrite = false;
+//		const bool fRead = false;
+//		unsigned int nSerSize = 0;
+//		ser_streamplaceholder s;
+//		assert(fGetSize || fWrite || fRead); /* suppress warning */
+//		s.nType = nType;
+//		s.nVersion = nVersion;
+//		Serializable_statement(fGetSize, fWrite, fRead, nSerSize,s, nType,nVersion, ser_action);
+//		return nSerSize;
+//	}
+//	template<typename Stream>
+//	void Serialize(Stream& s, int nType, int nVersion)const
+//	{
+//		CSerActionSerialize ser_action;
+//		const bool fGetSize = false;
+//		const bool fWrite = true;
+//		const bool fRead = false;
+//		unsigned int nSerSize = 0;
+//		assert(fGetSize || fWrite || fRead); /* suppress warning */
+//		Serializable_statement(fGetSize, fWrite, fRead, nSerSize, s, nType, nVersion, ser_action);
+//	}
+//	template<typename Stream>
+//	void Unserialize(Stream& s, int nType, int nVersion)
+//	{
+//		CSerActionUnserialize ser_action;
+//		const bool fGetSize = false;
+//		const bool fWrite = false;
+//		const bool fRead = true;
+//		unsigned int nSerSize = 0;
+//		assert(fGetSize || fWrite || fRead); /* suppress warning */
+//		Serializable_statement(fGetSize, fWrite, fRead, nSerSize, s, nType, nVersion, ser_action);
+//	}
+//};
 
 #define READWRITE(obj)      (nSerSize += ::SerReadWrite(s, (obj), nType, nVersion, ser_action))
 
@@ -666,12 +683,7 @@ void Unserialize(Stream& is, std::set<K, Pred, A>& m, int nType, int nVersion)
 
 
 
-//
-// Support for IMPLEMENT_SERIALIZE and READWRITE macro
-//
-class CSerActionGetSerializeSize { };
-class CSerActionSerialize { };
-class CSerActionUnserialize { };
+
 
 template<typename Stream, typename T>
 inline unsigned int SerReadWrite(Stream& s, const T& obj, int nType, int nVersion, CSerActionGetSerializeSize ser_action)
@@ -693,11 +705,6 @@ inline unsigned int SerReadWrite(Stream& s, T& obj, int nType, int nVersion, CSe
     return 0;
 }
 
-struct ser_streamplaceholder
-{
-    int nType;
-    int nVersion;
-};
 
 
 
@@ -825,7 +832,7 @@ public:
         else
             vch.insert(it, first, last);
     }
-
+/*
     void insert(iterator it, std::vector<char>::const_iterator first, std::vector<char>::const_iterator last)
     {
         if (it == vch.begin() + nReadPos && last - first <= nReadPos)
@@ -837,7 +844,7 @@ public:
         else
             vch.insert(it, first, last);
     }
-
+*/
 #if !defined(_MSC_VER) || _MSC_VER >= 1300
     void insert(iterator it, const char* first, const char* last)
     {

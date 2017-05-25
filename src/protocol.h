@@ -10,9 +10,10 @@
 #ifndef __INCLUDED_PROTOCOL_H__
 #define __INCLUDED_PROTOCOL_H__
 
+#include <string>
+
 #include "serialize.h"
 #include "netbase.h"
-#include <string>
 #include "uint256.h"
 
 #define PPCOIN_PORT  9901
@@ -44,14 +45,43 @@ class CMessageHeader
 
         std::string GetCommand() const;
         bool IsValid() const;
-
-        IMPLEMENT_SERIALIZE
-            (
-             READWRITE(FLATDATA(pchMessageStart));
-             READWRITE(FLATDATA(pchCommand));
-             READWRITE(nMessageSize);
-             READWRITE(nChecksum);
-            )
+	public:
+		unsigned int GetSerializeSize(int nType, int nVersion)const
+		{
+			//fGetSize=true/fWrite=false/fRead=false
+			CSerActionGetSerializeSize ser_action;
+			unsigned int nSerSize = 0;
+			ser_streamplaceholder s;
+			s.nType = nType;
+			s.nVersion = nVersion;
+			READWRITE(FLATDATA(pchMessageStart));
+			READWRITE(FLATDATA(pchCommand));
+			READWRITE(nMessageSize);
+			READWRITE(nChecksum);
+			return nSerSize;
+		}
+		template<typename Stream>
+		void Serialize(Stream& s, int nType, int nVersion)const
+		{
+			//fGetSize=false/fWrite=true/fRead=false
+			CSerActionSerialize ser_action;
+			unsigned int nSerSize = 0;
+			READWRITE(FLATDATA(pchMessageStart));
+			READWRITE(FLATDATA(pchCommand));
+			READWRITE(nMessageSize);
+			READWRITE(nChecksum);
+		}
+		template<typename Stream>
+		void Unserialize(Stream s, int nType, int nVersion)
+		{
+			//fGetSize=false/fWrite=false/fRead=true
+			CSerActionUnserialize ser_action;
+			unsigned int nSerSize = 0;
+			READWRITE(FLATDATA(pchMessageStart));
+			READWRITE(FLATDATA(pchCommand));
+			READWRITE(nMessageSize);
+			READWRITE(nChecksum);
+		}
 
     // TODO: make private (improves encapsulation)
     public:
@@ -76,21 +106,59 @@ class CAddress : public CService
         explicit CAddress(CService ipIn, uint64 nServicesIn=NODE_NETWORK);
 
         void Init();
-
-        IMPLEMENT_SERIALIZE
-            (
-             CAddress* pthis = const_cast<CAddress*>(this);
-             CService* pip = (CService*)pthis;
-             if (fRead)
-                 pthis->Init();
-             if (nType & SER_DISK)
-                 READWRITE(nVersion);
-             if ((nType & SER_DISK) ||
-                 (nVersion >= CADDR_TIME_VERSION && !(nType & SER_GETHASH)))
-                 READWRITE(nTime);
-             READWRITE(nServices);
-             READWRITE(*pip);
-            )
+	public:
+		unsigned int GetSerializeSize(int nType, int nVersion)const
+		{
+			//fGetSize=true/fWrite=false/fRead=false
+			CSerActionGetSerializeSize ser_action;
+			unsigned int nSerSize = 0;
+			ser_streamplaceholder s;
+			s.nType = nType;
+			s.nVersion = nVersion;
+			CAddress* pthis = const_cast<CAddress*>(this);
+			CService* pip = (CService*)pthis;
+			if (nType & SER_DISK)
+				READWRITE(nVersion);
+			if ((nType & SER_DISK) ||
+				(nVersion >= CADDR_TIME_VERSION && !(nType & SER_GETHASH)))
+				READWRITE(nTime);
+			READWRITE(nServices);
+			READWRITE(*pip);
+			return nSerSize;
+		}
+		template<typename Stream>
+		void Serialize(Stream& s, int nType, int nVersion)const
+		{
+			//fGetSize=false/fWrite=true/fRead=false
+			CSerActionSerialize ser_action;
+			unsigned int nSerSize = 0;
+			CAddress* pthis = const_cast<CAddress*>(this);
+			CService* pip = (CService*)pthis;
+			if (nType & SER_DISK)
+				READWRITE(nVersion);
+			if ((nType & SER_DISK) ||
+				(nVersion >= CADDR_TIME_VERSION && !(nType & SER_GETHASH)))
+				READWRITE(nTime);
+			READWRITE(nServices);
+			READWRITE(*pip);
+		}
+		template<typename Stream>
+		void Unserialize(Stream s, int nType, int nVersion)
+		{
+			//fGetSize=false/fWrite=false/fRead=true
+			CSerActionUnserialize ser_action;
+			unsigned int nSerSize = 0;
+			CAddress* pthis = const_cast<CAddress*>(this);
+			CService* pip = (CService*)pthis;
+			pthis->Init();
+			if (nType & SER_DISK)
+				READWRITE(nVersion);
+			if ((nType & SER_DISK) ||
+				(nVersion >= CADDR_TIME_VERSION && !(nType & SER_GETHASH)))
+				READWRITE(nTime);
+			READWRITE(nServices);
+			READWRITE(*pip);
+		}
 
         void print() const;
 
@@ -106,19 +174,43 @@ class CAddress : public CService
 };
 
 /** inv message data */
-class CInv
+class CInv : public CService
 {
     public:
         CInv();
         CInv(int typeIn, const uint256& hashIn);
         CInv(const std::string& strType, const uint256& hashIn);
-
-        IMPLEMENT_SERIALIZE
-        (
-            READWRITE(type);
-            READWRITE(hash);
-        )
-
+public:
+		unsigned int GetSerializeSize(int nType, int nVersion)const
+		{
+			//fGetSize=true/fWrite=false/fRead=false
+			CSerActionGetSerializeSize ser_action;
+			unsigned int nSerSize = 0;
+			ser_streamplaceholder s;
+			s.nType = nType;
+			s.nVersion = nVersion;
+			READWRITE(type);
+			READWRITE(hash);
+			return nSerSize;
+		}
+		template<typename Stream>
+		void Serialize(Stream& s, int nType, int nVersion)const
+		{
+			//fGetSize=false/fWrite=true/fRead=false
+			CSerActionSerialize ser_action;
+			unsigned int nSerSize = 0;
+			READWRITE(type);
+			READWRITE(hash);
+		}
+		template<typename Stream>
+		void Unserialize(Stream s, int nType, int nVersion)
+		{
+			//fGetSize=false/fWrite=false/fRead=true
+			CSerActionUnserialize ser_action;
+			unsigned int nSerSize = 0;
+			READWRITE(type);
+			READWRITE(hash);
+		}
         friend bool operator<(const CInv& a, const CInv& b);
 
         bool IsKnownType() const;

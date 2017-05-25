@@ -61,7 +61,8 @@ public:
 };
 
 /** An encapsulated public key. */
-class CPubKey {
+class CPubKey
+{
 private:
     std::vector<unsigned char> vchPubKey;
     friend class CKey;
@@ -72,10 +73,34 @@ public:
     friend bool operator==(const CPubKey &a, const CPubKey &b) { return a.vchPubKey == b.vchPubKey; }
     friend bool operator!=(const CPubKey &a, const CPubKey &b) { return a.vchPubKey != b.vchPubKey; }
     friend bool operator<(const CPubKey &a, const CPubKey &b) { return a.vchPubKey < b.vchPubKey; }
-
-    IMPLEMENT_SERIALIZE(
-        READWRITE(vchPubKey);
-    )
+public:
+	unsigned int GetSerializeSize(int nType, int nVersion)const
+	{
+		//fGetSize=true/fWrite=false/fRead=false
+		CSerActionGetSerializeSize ser_action;
+		unsigned int nSerSize = 0;
+		ser_streamplaceholder s;
+		s.nType = nType;
+		s.nVersion = nVersion;
+		READWRITE(vchPubKey);
+		return nSerSize;
+	}
+	template<typename Stream>
+	void Serialize(Stream& s, int nType, int nVersion)const
+	{
+		//fGetSize=false/fWrite=true/fRead=false
+		CSerActionSerialize ser_action;
+		unsigned int nSerSize = 0;
+		READWRITE(vchPubKey);
+	}
+	template<typename Stream>
+	void Unserialize(Stream s, int nType, int nVersion)
+	{
+		//fGetSize=false/fWrite=false/fRead=true
+		CSerActionUnserialize ser_action;
+		unsigned int nSerSize = 0;
+		READWRITE(vchPubKey);
+	}
 
     CKeyID GetID() const {
         return CKeyID(Hash160(vchPubKey));

@@ -61,56 +61,107 @@ class CNetAddr
         friend bool operator==(const CNetAddr& a, const CNetAddr& b);
         friend bool operator!=(const CNetAddr& a, const CNetAddr& b);
         friend bool operator<(const CNetAddr& a, const CNetAddr& b);
-
-        IMPLEMENT_SERIALIZE
-            (
-             READWRITE(FLATDATA(ip));
-            )
+public:
+	unsigned int GetSerializeSize(int nType, int nVersion)const
+	{
+		//fGetSize=true/fWrite=false/fRead=false
+		CSerActionGetSerializeSize ser_action;
+		unsigned int nSerSize = 0;
+		ser_streamplaceholder s;
+		s.nType = nType;
+		s.nVersion = nVersion;
+		READWRITE(FLATDATA(ip));
+		return nSerSize;
+	}
+	template<typename Stream>
+	void Serialize(Stream& s, int nType, int nVersion)const
+	{
+		//fGetSize=false/fWrite=true/fRead=false
+		CSerActionSerialize ser_action;
+		unsigned int nSerSize = 0;
+		READWRITE(FLATDATA(ip));
+	}
+	template<typename Stream>
+	void Unserialize(Stream s, int nType, int nVersion)
+	{
+		//fGetSize=false/fWrite=false/fRead=true
+		CSerActionUnserialize ser_action;
+		unsigned int nSerSize = 0;
+		READWRITE(FLATDATA(ip));
+	}
 };
 
 /** A combination of a network address (CNetAddr) and a (TCP) port */
 class CService : public CNetAddr
 {
-    protected:
-        unsigned short port; // host order
+protected:
+	unsigned short port; // host order
 
-    public:
-        CService();
-        CService(const CNetAddr& ip, unsigned short port);
-        CService(const struct in_addr& ipv4Addr, unsigned short port);
-        CService(const struct sockaddr_in& addr);
-        explicit CService(const char *pszIpPort, int portDefault, bool fAllowLookup = false);
-        explicit CService(const char *pszIpPort, bool fAllowLookup = false);
-        explicit CService(const std::string& strIpPort, int portDefault, bool fAllowLookup = false);
-        explicit CService(const std::string& strIpPort, bool fAllowLookup = false);
-        void Init();
-        void SetPort(unsigned short portIn);
-        unsigned short GetPort() const;
-        bool GetSockAddr(struct sockaddr_in* paddr) const;
-        friend bool operator==(const CService& a, const CService& b);
-        friend bool operator!=(const CService& a, const CService& b);
-        friend bool operator<(const CService& a, const CService& b);
-        std::vector<unsigned char> GetKey() const;
-        std::string ToString() const;
-        std::string ToStringPort() const;
-        std::string ToStringIPPort() const;
-        void print() const;
+public:
+	CService();
+	CService(const CNetAddr& ip, unsigned short port);
+	CService(const struct in_addr& ipv4Addr, unsigned short port);
+	CService(const struct sockaddr_in& addr);
+	explicit CService(const char *pszIpPort, int portDefault, bool fAllowLookup = false);
+	explicit CService(const char *pszIpPort, bool fAllowLookup = false);
+	explicit CService(const std::string& strIpPort, int portDefault, bool fAllowLookup = false);
+	explicit CService(const std::string& strIpPort, bool fAllowLookup = false);
+	void Init();
+	void SetPort(unsigned short portIn);
+	unsigned short GetPort() const;
+	bool GetSockAddr(struct sockaddr_in* paddr) const;
+	friend bool operator==(const CService& a, const CService& b);
+	friend bool operator!=(const CService& a, const CService& b);
+	friend bool operator<(const CService& a, const CService& b);
+	std::vector<unsigned char> GetKey() const;
+	std::string ToString() const;
+	std::string ToStringPort() const;
+	std::string ToStringIPPort() const;
+	void print() const;
 
 #ifdef USE_IPV6
-        CService(const struct in6_addr& ipv6Addr, unsigned short port);
-        bool GetSockAddr6(struct sockaddr_in6* paddr) const;
-        CService(const struct sockaddr_in6& addr);
+	CService(const struct in6_addr& ipv6Addr, unsigned short port);
+	bool GetSockAddr6(struct sockaddr_in6* paddr) const;
+	CService(const struct sockaddr_in6& addr);
 #endif
-
-        IMPLEMENT_SERIALIZE
-            (
-             CService* pthis = const_cast<CService*>(this);
-             READWRITE(FLATDATA(ip));
-             unsigned short portN = htons(port);
-             READWRITE(portN);
-             if (fRead)
-                 pthis->port = ntohs(portN);
-            )
+public:
+	unsigned int GetSerializeSize(int nType, int nVersion)const
+	{
+		//fGetSize=true/fWrite=false/fRead=false
+		CSerActionGetSerializeSize ser_action;
+		unsigned int nSerSize = 0;
+		ser_streamplaceholder s;
+		s.nType = nType;
+		s.nVersion = nVersion;
+		CService* pthis = const_cast<CService*>(this);
+		READWRITE(FLATDATA(ip));
+		unsigned short portN = htons(port);
+		READWRITE(portN);
+		return nSerSize;
+	}
+	template<typename Stream>
+	void Serialize(Stream& s, int nType, int nVersion)const
+	{
+		//fGetSize=false/fWrite=true/fRead=false
+		CSerActionSerialize ser_action;
+		unsigned int nSerSize = 0;
+		CService* pthis = const_cast<CService*>(this);
+		READWRITE(FLATDATA(ip));
+		unsigned short portN = htons(port);
+		READWRITE(portN);
+	}
+	template<typename Stream>
+	void Unserialize(Stream s, int nType, int nVersion)
+	{
+		//fGetSize=false/fWrite=false/fRead=true
+		CSerActionUnserialize ser_action;
+		unsigned int nSerSize = 0;
+		CService* pthis = const_cast<CService*>(this);
+		READWRITE(FLATDATA(ip));
+		unsigned short portN = htons(port);
+		READWRITE(portN);
+		pthis->port = ntohs(portN);
+	}
 };
 
 bool LookupHost(const char *pszName, std::vector<CNetAddr>& vIP, unsigned int nMaxSolutions = 0, bool fAllowLookup = true);

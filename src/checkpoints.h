@@ -6,6 +6,7 @@
 #define  BITCOIN_CHECKPOINT_H
 
 #include <map>
+#include "serialize.h"
 #include "net.h"
 #include "util.h"
 
@@ -54,13 +55,40 @@ class CUnsignedSyncCheckpoint
 public:
     int nVersion;
     uint256 hashCheckpoint;      // checkpoint block
-
-    IMPLEMENT_SERIALIZE
-    (
-        READWRITE(this->nVersion);
-        nVersion = this->nVersion;
-        READWRITE(hashCheckpoint);
-    )
+public:
+	unsigned int GetSerializeSize(int nType, int nVersion)const
+	{
+		//fGetSize=true/fWrite=false/fRead=false
+		CSerActionGetSerializeSize ser_action;
+		unsigned int nSerSize = 0;
+		ser_streamplaceholder s;
+		s.nType = nType;
+		s.nVersion = nVersion;
+		READWRITE(this->nVersion);
+		nVersion = this->nVersion;
+		READWRITE(hashCheckpoint);
+		return nSerSize;
+	}
+	template<typename Stream>
+	void Serialize(Stream& s, int nType, int nVersion)const
+	{
+		//fGetSize=false/fWrite=true/fRead=false
+		CSerActionSerialize ser_action;
+		unsigned int nSerSize = 0;
+		READWRITE(this->nVersion);
+		nVersion = this->nVersion;
+		READWRITE(hashCheckpoint);
+	}
+	template<typename Stream>
+	void Unserialize(Stream s, int nType, int nVersion)
+	{
+		//fGetSize=false/fWrite=false/fRead=true
+		CSerActionUnserialize ser_action;
+		unsigned int nSerSize = 0;
+		READWRITE(this->nVersion);
+		nVersion = this->nVersion;
+		READWRITE(hashCheckpoint);
+	}
 
     void SetNull()
     {
@@ -98,12 +126,37 @@ public:
     {
         SetNull();
     }
-
-    IMPLEMENT_SERIALIZE
-    (
-        READWRITE(vchMsg);
-        READWRITE(vchSig);
-    )
+public:
+	unsigned int GetSerializeSize(int nType, int nVersion)const
+	{
+		//fGetSize=true/fWrite=false/fRead=false
+		CSerActionGetSerializeSize ser_action;
+		unsigned int nSerSize = 0;
+		ser_streamplaceholder s;
+		s.nType = nType;
+		s.nVersion = nVersion;
+		READWRITE(vchMsg);
+		READWRITE(vchSig);
+		return nSerSize;
+	}
+	template<typename Stream>
+	void Serialize(Stream& s, int nType, int nVersion)const
+	{
+		//fGetSize=false/fWrite=true/fRead=false
+		CSerActionSerialize ser_action;
+		unsigned int nSerSize = 0;
+		READWRITE(vchMsg);
+		READWRITE(vchSig);
+	}
+	template<typename Stream>
+	void Unserialize(Stream s, int nType, int nVersion)
+	{
+		//fGetSize=false/fWrite=false/fRead=true
+		CSerActionUnserialize ser_action;
+		unsigned int nSerSize = 0;
+		READWRITE(vchMsg);
+		READWRITE(vchSig);
+	}
 
     void SetNull()
     {

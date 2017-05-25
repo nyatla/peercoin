@@ -47,14 +47,46 @@ public:
         nTime = GetTime();
         vchPubKey = vchPubKeyIn;
     }
-
-    IMPLEMENT_SERIALIZE
-    (
-        if (!(nType & SER_GETHASH))
-            READWRITE(nVersion);
-        READWRITE(nTime);
-        READWRITE(vchPubKey);
-    )
+public:
+	unsigned int GetSerializeSize(int nType, int nVersion)const
+	{
+		//fGetSize=true/fWrite=false/fRead=false
+		CSerActionGetSerializeSize ser_action;
+		unsigned int nSerSize = 0;
+		ser_streamplaceholder s;
+		s.nType = nType;
+		s.nVersion = nVersion;
+		if (!(nType & SER_GETHASH)) {
+			READWRITE(nVersion);
+		}
+		READWRITE(nTime);
+		READWRITE(vchPubKey);
+		return nSerSize;
+	}
+	template<typename Stream>
+	void Serialize(Stream& s, int nType, int nVersion)const
+	{
+		//fGetSize=false/fWrite=true/fRead=false
+		CSerActionSerialize ser_action;
+		unsigned int nSerSize = 0;
+		if (!(nType & SER_GETHASH)) {
+			READWRITE(nVersion);
+		}
+		READWRITE(nTime);
+		READWRITE(vchPubKey);
+	}
+	template<typename Stream>
+	void Unserialize(Stream s, int nType, int nVersion)
+	{
+		//fGetSize=false/fWrite=false/fRead=true
+		CSerActionUnserialize ser_action;
+		unsigned int nSerSize = 0;
+		if (!(nType & SER_GETHASH)) {
+			READWRITE(nVersion);
+		}
+		READWRITE(nTime);
+		READWRITE(vchPubKey);
+	}
 };
 
 /** A CWallet is an extension of a keystore, which also maintains a set of transactions and balances,
@@ -377,52 +409,109 @@ public:
         nAvailableCreditCached = 0;
         nChangeCached = 0;
     }
+public:
+	unsigned int GetSerializeSize(int nType, int nVersion)const
+	{
+		//fGetSize=true/fWrite=false/fRead=false
+		CSerActionGetSerializeSize ser_action;
+		unsigned int nSerSize = 0;
+		ser_streamplaceholder s;
+		s.nType = nType;
+		s.nVersion = nVersion;
+		CWalletTx* pthis = const_cast<CWalletTx*>(this);
+		char fSpent = false;
+		{
+			pthis->mapValue["fromaccount"] = pthis->strFromAccount;
 
-    IMPLEMENT_SERIALIZE
-    (
-        CWalletTx* pthis = const_cast<CWalletTx*>(this);
-        if (fRead)
-            pthis->Init(NULL);
-        char fSpent = false;
+			std::string str;
+			BOOST_FOREACH(char f, vfSpent)
+			{
+				str += (f ? '1' : '0');
+				if (f)
+					fSpent = true;
+			}
+			pthis->mapValue["spent"] = str;
+		}
+		nSerSize += SerReadWrite(s, *(CMerkleTx*)this, nType, nVersion, ser_action);
+		READWRITE(vtxPrev);
+		READWRITE(mapValue);
+		READWRITE(vOrderForm);
+		READWRITE(fTimeReceivedIsTxTime);
+		READWRITE(nTimeReceived);
+		READWRITE(fFromMe);
+		READWRITE(fSpent);
+		pthis->mapValue.erase("fromaccount");
+		pthis->mapValue.erase("version");
+		pthis->mapValue.erase("spent");
+		return nSerSize;
+	}
+	template<typename Stream>
+	void Serialize(Stream& s, int nType, int nVersion)const
+	{
+		//fGetSize=false/fWrite=true/fRead=false
+		CSerActionSerialize ser_action;
+		unsigned int nSerSize = 0;
+		CWalletTx* pthis = const_cast<CWalletTx*>(this);
+		char fSpent = false;
 
-        if (!fRead)
-        {
-            pthis->mapValue["fromaccount"] = pthis->strFromAccount;
+		pthis->mapValue["fromaccount"] = pthis->strFromAccount;
 
-            std::string str;
-            BOOST_FOREACH(char f, vfSpent)
-            {
-                str += (f ? '1' : '0');
-                if (f)
-                    fSpent = true;
-            }
-            pthis->mapValue["spent"] = str;
-        }
+		std::string str;
+		BOOST_FOREACH(char f, vfSpent)
+		{
+			str += (f ? '1' : '0');
+			if (f)
+				fSpent = true;
+		}
+		pthis->mapValue["spent"] = str;
 
-        nSerSize += SerReadWrite(s, *(CMerkleTx*)this, nType, nVersion,ser_action);
-        READWRITE(vtxPrev);
-        READWRITE(mapValue);
-        READWRITE(vOrderForm);
-        READWRITE(fTimeReceivedIsTxTime);
-        READWRITE(nTimeReceived);
-        READWRITE(fFromMe);
-        READWRITE(fSpent);
+		nSerSize += SerReadWrite(s, *(CMerkleTx*)this, nType, nVersion, ser_action);
+		READWRITE(vtxPrev);
+		READWRITE(mapValue);
+		READWRITE(vOrderForm);
+		READWRITE(fTimeReceivedIsTxTime);
+		READWRITE(nTimeReceived);
+		READWRITE(fFromMe);
+		READWRITE(fSpent);
 
-        if (fRead)
-        {
-            pthis->strFromAccount = pthis->mapValue["fromaccount"];
+		pthis->mapValue.erase("fromaccount");
+		pthis->mapValue.erase("version");
+		pthis->mapValue.erase("spent");
+	}
+	template<typename Stream>
+	void Unserialize(Stream s, int nType, int nVersion)
+	{
+		//fGetSize=false/fWrite=false/fRead=true
+		CSerActionUnserialize ser_action;
+		unsigned int nSerSize = 0;
+		CWalletTx* pthis = const_cast<CWalletTx*>(this);
 
-            if (mapValue.count("spent"))
-                BOOST_FOREACH(char c, pthis->mapValue["spent"])
-                    pthis->vfSpent.push_back(c != '0');
-            else
-                pthis->vfSpent.assign(vout.size(), fSpent);
-        }
+		pthis->Init(NULL);
+		char fSpent = false;
 
-        pthis->mapValue.erase("fromaccount");
-        pthis->mapValue.erase("version");
-        pthis->mapValue.erase("spent");
-    )
+		nSerSize += SerReadWrite(s, *(CMerkleTx*)this, nType, nVersion, ser_action);
+		READWRITE(vtxPrev);
+		READWRITE(mapValue);
+		READWRITE(vOrderForm);
+		READWRITE(fTimeReceivedIsTxTime);
+		READWRITE(nTimeReceived);
+		READWRITE(fFromMe);
+		READWRITE(fSpent);
+
+		{
+			pthis->strFromAccount = pthis->mapValue["fromaccount"];
+
+			if (mapValue.count("spent"))
+				BOOST_FOREACH(char c, pthis->mapValue["spent"])
+				pthis->vfSpent.push_back(c != '0');
+			else
+				pthis->vfSpent.assign(vout.size(), fSpent);
+		}
+
+		pthis->mapValue.erase("fromaccount");
+		pthis->mapValue.erase("version");
+		pthis->mapValue.erase("spent");
+	}
 
     // marks certain txout's as spent
     // returns true if any update took place
@@ -666,16 +755,52 @@ public:
         nTimeCreated = (nExpires ? GetTime() : 0);
         nTimeExpires = nExpires;
     }
-
-    IMPLEMENT_SERIALIZE
-    (
-        if (!(nType & SER_GETHASH))
-            READWRITE(nVersion);
-        READWRITE(vchPrivKey);
-        READWRITE(nTimeCreated);
-        READWRITE(nTimeExpires);
-        READWRITE(strComment);
-    )
+public:
+	unsigned int GetSerializeSize(int nType, int nVersion)const
+	{
+		//fGetSize=true/fWrite=false/fRead=false
+		CSerActionGetSerializeSize ser_action;
+		unsigned int nSerSize = 0;
+		ser_streamplaceholder s;
+		s.nType = nType;
+		s.nVersion = nVersion;
+		if (!(nType & SER_GETHASH)) {
+			READWRITE(nVersion);
+		}
+		READWRITE(vchPrivKey);
+		READWRITE(nTimeCreated);
+		READWRITE(nTimeExpires);
+		READWRITE(strComment);
+		return nSerSize;
+	}
+	template<typename Stream>
+	void Serialize(Stream& s, int nType, int nVersion)const
+	{
+		//fGetSize=false/fWrite=true/fRead=false
+		CSerActionSerialize ser_action;
+		unsigned int nSerSize = 0;
+		if (!(nType & SER_GETHASH)) {
+			READWRITE(nVersion);
+		}
+		READWRITE(vchPrivKey);
+		READWRITE(nTimeCreated);
+		READWRITE(nTimeExpires);
+		READWRITE(strComment);
+	}
+	template<typename Stream>
+	void Unserialize(Stream s, int nType, int nVersion)
+	{
+		//fGetSize=false/fWrite=false/fRead=true
+		CSerActionUnserialize ser_action;
+		unsigned int nSerSize = 0;
+		if (!(nType & SER_GETHASH)) {
+			READWRITE(nVersion);
+		}
+		READWRITE(vchPrivKey);
+		READWRITE(nTimeCreated);
+		READWRITE(nTimeExpires);
+		READWRITE(strComment);
+	}
 };
 
 
@@ -700,13 +825,44 @@ public:
     {
         vchPubKey = CPubKey();
     }
+public:
+	unsigned int GetSerializeSize(int nType, int nVersion)const
+	{
+		//fGetSize=true/fWrite=false/fRead=false
+		CSerActionGetSerializeSize ser_action;
+		unsigned int nSerSize = 0;
+		ser_streamplaceholder s;
+		s.nType = nType;
+		s.nVersion = nVersion;
+		if (!(nType & SER_GETHASH)) {
+			READWRITE(nVersion);
+		}
+		READWRITE(vchPubKey);
+		return nSerSize;
+	}
+	template<typename Stream>
+	void Serialize(Stream& s, int nType, int nVersion)const
+	{
+		//fGetSize=false/fWrite=true/fRead=false
+		CSerActionSerialize ser_action;
+		unsigned int nSerSize = 0;
+		if (!(nType & SER_GETHASH)) {
+			READWRITE(nVersion);
+		}
+		READWRITE(vchPubKey);
+	}
+	template<typename Stream>
+	void Unserialize(Stream s, int nType, int nVersion)
+	{
+		//fGetSize=false/fWrite=false/fRead=true
+		CSerActionUnserialize ser_action;
+		unsigned int nSerSize = 0;
+		if (!(nType & SER_GETHASH)) {
+			READWRITE(nVersion);
+		}
+		READWRITE(vchPubKey);
+	}
 
-    IMPLEMENT_SERIALIZE
-    (
-        if (!(nType & SER_GETHASH))
-            READWRITE(nVersion);
-        READWRITE(vchPubKey);
-    )
 };
 
 
@@ -736,17 +892,52 @@ public:
         strOtherAccount.clear();
         strComment.clear();
     }
-
-    IMPLEMENT_SERIALIZE
-    (
-        if (!(nType & SER_GETHASH))
-            READWRITE(nVersion);
-        // Note: strAccount is serialized as part of the key, not here.
-        READWRITE(nCreditDebit);
-        READWRITE(nTime);
-        READWRITE(strOtherAccount);
-        READWRITE(strComment);
-    )
+public:
+	unsigned int GetSerializeSize(int nType, int nVersion)const
+	{
+		//fGetSize=true/fWrite=false/fRead=false
+		CSerActionGetSerializeSize ser_action;
+		unsigned int nSerSize = 0;
+		ser_streamplaceholder s;
+		s.nType = nType;
+		s.nVersion = nVersion;
+		if (!(nType & SER_GETHASH))
+			READWRITE(nVersion);
+		// Note: strAccount is serialized as part of the key, not here.
+		READWRITE(nCreditDebit);
+		READWRITE(nTime);
+		READWRITE(strOtherAccount);
+		READWRITE(strComment);
+		return nSerSize;
+	}
+	template<typename Stream>
+	void Serialize(Stream& s, int nType, int nVersion)const
+	{
+		//fGetSize=false/fWrite=true/fRead=false
+		CSerActionSerialize ser_action;
+		unsigned int nSerSize = 0;
+		if (!(nType & SER_GETHASH))
+			READWRITE(nVersion);
+		// Note: strAccount is serialized as part of the key, not here.
+		READWRITE(nCreditDebit);
+		READWRITE(nTime);
+		READWRITE(strOtherAccount);
+		READWRITE(strComment);
+	}
+	template<typename Stream>
+	void Unserialize(Stream s, int nType, int nVersion)
+	{
+		//fGetSize=false/fWrite=false/fRead=true
+		CSerActionUnserialize ser_action;
+		unsigned int nSerSize = 0;
+		if (!(nType & SER_GETHASH))
+			READWRITE(nVersion);
+		// Note: strAccount is serialized as part of the key, not here.
+		READWRITE(nCreditDebit);
+		READWRITE(nTime);
+		READWRITE(strOtherAccount);
+		READWRITE(strComment);
+	}
 };
 
 bool GetWalletFile(CWallet* pwallet, std::string &strWalletFileOut);
